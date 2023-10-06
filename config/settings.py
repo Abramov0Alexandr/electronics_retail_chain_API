@@ -46,6 +46,13 @@ INSTALLED_APPS = [
     'django_filters',
     'django_extensions',
     'drf_yasg',
+
+    'contacts.apps.ContactsConfig',
+    'employees.apps.EmployeesConfig',
+    'factories.apps.FactoriesConfig',
+    'products.apps.ProductsConfig',
+    'retail_chains.apps.RetailChainsConfig',
+    'vendors.apps.VendorsConfig',
 ]
 
 MIDDLEWARE = [
