@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "electronics-retail-chain-api"
+version = "0.1.0"
+description = "This project is the development of an API for a hierarchical electronics sales network, including vendor, product, and employee models, as well as the ability to filter by country and access rights for active employees."
+authors = ["Alexandr Abramov <https://github.com/Abramov0Alexandr>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+django = "^4.2.6"
+djangorestframework = "^3.14.0"
+
+
+[tool.poetry.group.dev.dependencies]
+djangorestframework-simplejwt = "^5.3.0"
+psycopg2-binary = "^2.9.9"
+django-filter = "^23.3"
+drf-yasg = "^1.21.7"
+flake8 = "^6.1.0"
+python-dotenv = "^1.0.0"
+
+
+[tool.poetry.group.shell.dependencies]
+django-extensions = "^3.2.3"
+ipython = "^8.16.1"
+pyparsing = "^3.1.1"
+pydot = "^1.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
