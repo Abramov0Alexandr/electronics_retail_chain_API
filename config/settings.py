@@ -135,7 +135,19 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+# Shell Plus configuration options
+# https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
+SHELL_PLUS_PRINT_SQL = True
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Substituting a custom User model
+# https://docs.djangoproject.com/en/4.2/topics/auth/customizing/
+
+AUTH_USER_MODEL = 'employees.Employee'
