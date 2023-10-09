@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/employee/', include('employees.urls', namespace='employees')),
     path('api/factories/', include('suppliers.urls', namespace='factories')),
     path('api/products/', include('products.urls', namespace='products')),
+    path('api/contacts/', include('contacts.urls', namespace='contacts')),
 
     # authorization urls
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

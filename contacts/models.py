@@ -11,6 +11,7 @@ class Contacts(models.Model):
     city = models.CharField(max_length=100, verbose_name='Город')
     street = models.CharField(max_length=100, verbose_name='Улица')
     building_number = models.CharField(max_length=10, verbose_name='Номер дома')
+    contact_owner = models.CharField(max_length=150, unique=True, verbose_name='Название организации', **NULLABLE)
 
     objects = models.Manager()
 
