@@ -1,1 +1,1 @@
-from .factory_views import FactoryCreateApiView, FactoryListAPIView, DeleteFactoryAPIView
+from .factory_views import FactoryCreateApiView, FactoryListAPIView, UpdateFactoryAPIView, DeleteFactoryAPIView

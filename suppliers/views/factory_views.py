@@ -2,6 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from suppliers.models import Factory
 from suppliers.serializers import MainFactorySerializer, FactoryDetailSerializer
+from suppliers.serializers.factory_serializers import FactoryUpdateSerializer
 
 
 class FactoryCreateApiView(generics.CreateAPIView):
@@ -16,6 +17,11 @@ class FactoryCreateApiView(generics.CreateAPIView):
 class FactoryListAPIView(generics.ListAPIView):
     queryset = Factory.objects.all()
     serializer_class = FactoryDetailSerializer
+
+
+class UpdateFactoryAPIView(generics.UpdateAPIView):
+    queryset = Factory.objects.all()
+    serializer_class = FactoryUpdateSerializer
 
 
 class DeleteFactoryAPIView(generics.DestroyAPIView):
