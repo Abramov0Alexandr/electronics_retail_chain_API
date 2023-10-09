@@ -49,11 +49,49 @@ INSTALLED_APPS = [
 
     'contacts.apps.ContactsConfig',
     'employees.apps.EmployeesConfig',
-    'factories.apps.FactoriesConfig',
     'products.apps.ProductsConfig',
-    'retail_chains.apps.RetailChainsConfig',
-    'vendors.apps.VendorsConfig',
+    'suppliers.apps.SuppliersConfig',
 ]
+
+
+# Project configuration for rest_framework_simplejwt
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html#project-configuration
+
+# Setting the authentication scheme
+# https://www.django-rest-framework.org/api-guide/authentication/#sessionauthentication
+
+# Setting the permission policy
+# https://www.django-rest-framework.org/api-guide/permissions/#setting-the-permission-policy
+
+# Integration with Django Rest Framework is provided through a DRF-specific FilterSet and a filter backend.
+# These may be found in the rest_framework sub-package.
+# https://django-filter.readthedocs.io/en/stable/guide/rest_framework.html
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
+    ],
+
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}
+
+
+# Some of Simple JWT’s behavior can be customized through settings variables in settings.py
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -138,6 +176,7 @@ STATIC_URL = 'static/'
 
 # Shell Plus configuration options
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
+
 SHELL_PLUS_PRINT_SQL = True
 
 
