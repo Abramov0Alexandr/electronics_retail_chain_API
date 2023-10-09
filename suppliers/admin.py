@@ -4,7 +4,7 @@ from suppliers.models.factories import Factory
 
 @admin.register(Factory)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'registration_date', 'contacts', 'manufactured_products')
+    list_display = ('id', 'title', 'registration_date', 'contacts',)
     list_display_links = ('title',)
 
 

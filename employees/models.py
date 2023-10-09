@@ -17,7 +17,6 @@ class Employee(AbstractUser):
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
     patronymic = models.CharField(max_length=150, verbose_name='Отчество', **NULLABLE)
     email = models.EmailField(unique=True, verbose_name='Email')
-    employer_title = models.CharField(max_length=150, verbose_name='Организация', **NULLABLE)
     is_active = models.BooleanField(default=True, verbose_name='Статус активности')
 
     objects = CustomUserManager()
@@ -26,9 +25,9 @@ class Employee(AbstractUser):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name} {self.employer_title}'
+        return f'{self.first_name} {self.last_name}'
 
     class Meta:
-        ordering = ('pk', 'employer_title',)
+        ordering = ('pk',)
         verbose_name = 'Сотрудник'
         verbose_name_plural = 'Сотрудники'
