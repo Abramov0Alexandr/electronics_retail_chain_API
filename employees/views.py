@@ -1,16 +1,15 @@
 from rest_framework import generics
-
 from employees.models import Employee
-from employees.serializers import EmployeeSerializers, EmployeeListSerializers
+from .serializers import EmployeeSerializer, EmployeeListSerializer
 
 
 class CreateEmployeeApiView(generics.CreateAPIView):
-    serializer_class = EmployeeSerializers
+    serializer_class = EmployeeSerializer
 
 
 class EmployeesListAPIView(generics.ListAPIView):
     queryset = Employee.objects.all()
-    serializer_class = EmployeeListSerializers
+    serializer_class = EmployeeListSerializer
 
 
 class DeleteEmployeeApiView(generics.DestroyAPIView):
