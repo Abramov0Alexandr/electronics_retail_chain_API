@@ -1,6 +1,9 @@
 from django.db import models
 
 
+NULLABLE = {'blank': True, 'null': True}
+
+
 class Contacts(models.Model):
 
     email = models.EmailField(max_length=50, unique=True, verbose_name='Email')
@@ -8,6 +11,8 @@ class Contacts(models.Model):
     city = models.CharField(max_length=100, verbose_name='Город')
     street = models.CharField(max_length=100, verbose_name='Улица')
     building_number = models.CharField(max_length=10, verbose_name='Номер дома')
+
+    objects = models.Manager()
 
     def __str__(self):
         return f'{self.email} {self.country}'
