@@ -19,18 +19,22 @@ class FactoryListAPIView(generics.ListAPIView):
     serializer_class = FactoryDetailSerializer
 
 
-class UpdateFactoryAPIView(generics.UpdateAPIView):
+class FactoryUpdateAPIView(generics.UpdateAPIView):
     queryset = Factory.objects.all()
     serializer_class = FactoryUpdateSerializer
 
 
-class DeleteFactoryAPIView(generics.DestroyAPIView):
+class FactoryDeleteAPIView(generics.DestroyAPIView):
+    """
+    Удаляет и сам объект модели Factory и связанные с ним контакты
+    """
+
     queryset = Factory.objects.all()
 
     def delete(self, request, *args, **kwargs):
 
         factory = self.get_object()  # Получаем объект завода
-        contacts = factory.contacts  # Получаем связанные контакты
+        contacts = factory.contacts  # Получаем связанные с объектом контакты
 
         if contacts:  # Удаляем связанные контакты
             contacts.delete()
@@ -38,5 +42,5 @@ class DeleteFactoryAPIView(generics.DestroyAPIView):
         self.perform_destroy(factory)  # Вызываем стандартный метод удаления для завода
 
         # Возвращаем успешный ответ
-        return Response({'detail': 'Завод и связанные с ним контакты были успешно удалены'},
+        return Response({'detail': f'Завод {factory.title} и связанные с ним контакты были успешно удалены'},
                         status=status.HTTP_204_NO_CONTENT)
