@@ -19,4 +19,9 @@ urlpatterns = [
     path('retail_chain/update/<int:pk>/', views.RetailChainUpdateAPIView.as_view(), name='update_retail_chain'),
     path('retail_chain/delete/<int:pk>/', views.RetailChainDeleteAPIView.as_view(), name='delete_retail_chain'),
 
+    # Эндпоинты для модели Vendor
+    path('vendor/create/', views.VendorCreateAPIView.as_view(), name='create_vendor'),
+    path('vendor/list/', views.VendorsListAPIView.as_view(), name='vendors_list'),
+    path('vendor/update/<int:pk>/', views.VendorUpdateAPIView.as_view(), name='update_vendor'),
+    path('vendor/delete/<int:pk>/', views.VendorDeleteAPIView.as_view(), name='delete_vendor'),
 ]
