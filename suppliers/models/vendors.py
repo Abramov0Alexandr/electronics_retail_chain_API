@@ -9,11 +9,6 @@ NULLABLE = {'blank': True, 'null': True}
 
 class Vendors(models.Model):
 
-    SUPPLIER_TYPE_CHOICES = [
-        ('Factory', 'Завод'),
-        ('RetailChains', 'Розничная сеть'),
-    ]
-
     title = models.CharField(max_length=150, unique=True, verbose_name='Название')
 
     registration_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата регистрации')
