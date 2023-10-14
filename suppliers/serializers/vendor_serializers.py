@@ -1,10 +1,7 @@
-from django.db import IntegrityError
 from rest_framework import serializers, status
-
-from contacts.models import Contacts
 from contacts.serializers import ContactSerializer
 from suppliers.models import Vendors, RetailChains, Factory
-from suppliers.validators import RequiredSupplierField
+from suppliers.validators import RequiredSupplierField, NewTitleValidationError
 
 
 class VendorSelfSupplierSerializer(serializers.ModelSerializer):
@@ -113,31 +110,23 @@ class VendorsListSerializer(serializers.ModelSerializer):
 class VendorUpdateSerializer(serializers.ModelSerializer):
     """
     Сериализатор для обновления информации об объекте модели Vendors.
-    Сериализатор позволяет изменить только название объекта, при этом,
-    в связанном контакте модели Contacts аналогично изменяется поле contact_owner
+    Сериализатор вместе с названием объекта, обновляет поле contact_owner модели Contacts
     """
 
     def update(self, instance, validated_data):
-        new_title = validated_data.get('title')
-        if new_title and new_title != instance.title:
 
-            # Проверить, существует ли запись с новым title
-            if Vendors.objects.filter(title=new_title).exists():
-                raise serializers.ValidationError(
-                    {'detail': f'Название {new_title} занято.'})
+        # Обновить название завода
+        instance.title = validated_data.get('title', instance.title)
+        instance.save()
 
-            instance.title = new_title
-            instance.save()
-
+        # Обновить контакты
         contact_instance = instance.contacts
-        contact_owner = validated_data.get('title')
-
-        if contact_owner and contact_owner != contact_instance.contact_owner:
-            contact_instance.contact_owner = contact_owner
-            contact_instance.save()
+        contact_instance.contact_owner = validated_data.get('title', contact_instance.contact_owner)
+        contact_instance.save()
 
         return instance
 
     class Meta:
         model = Factory
+        validators = [NewTitleValidationError(field='title')]
         fields = ('title',)
