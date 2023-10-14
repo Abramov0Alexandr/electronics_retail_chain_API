@@ -1,6 +1,7 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from contacts.models import Contacts
-from suppliers.models import Factory
 
 
 NULLABLE = {'blank': True, 'null': True}
@@ -15,8 +16,10 @@ class RetailChains(models.Model):
     contacts = models.OneToOneField(Contacts, on_delete=models.CASCADE,
                                     related_name='retail_contacts', verbose_name='Контакты', **NULLABLE)
 
-    supplier = models.ForeignKey(Factory, to_field='title', on_delete=models.SET_NULL, related_name='supplier_data',
-                                 null=True, verbose_name='Поставщик')
+    supplier_title = models.CharField(max_length=250, verbose_name='Наименование поставщика', **NULLABLE)
+    supplier_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, **NULLABLE,)
+    supplier_id = models.CharField(max_length=250, verbose_name='ID поставщика', **NULLABLE)
+    supplier = GenericForeignKey('supplier_content_type', 'supplier_id',)
 
     debt_amount = models.DecimalField(max_digits=11, decimal_places=2,
                                       default=0, verbose_name='Задолженность перед поставщиком')

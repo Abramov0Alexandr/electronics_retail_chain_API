@@ -7,7 +7,6 @@ from suppliers.serializers import FactoryDetailSerializer
 class MainRetailChainsSerializer(serializers.ModelSerializer):
 
     supplier = serializers.PrimaryKeyRelatedField(queryset=Factory.objects.all(), required=True, read_only=False)
-
     contacts = ContactSerializer(required=True, read_only=False)
 
     class Meta:
@@ -21,6 +20,7 @@ class MainRetailChainsSerializer(serializers.ModelSerializer):
 
         # Установить contact_owner в модели Contacts данными из retail_chain_data(:validated_data)
         contacts_data['contact_owner'] = retail_chain_data['title']
+        contacts_data['type_owner_organization'] = 'Розничная сеть'
 
         contacts = ContactSerializer(data=contacts_data)
 
@@ -49,7 +49,8 @@ class RetailChainListSerializer(serializers.ModelSerializer):
 
 class RetailChainUpdateSerializer(serializers.ModelSerializer):
     """
-    При изменении названия завода ток же изменяется и поле contact_owner в модели Контакты
+    Сериализатор для обновления информации об объекте модели RetailChains.
+    Сериализатор вместе с названием объекта, обновляет поле contact_owner модели Contacts
     """
 
     def update(self, instance, validated_data):
