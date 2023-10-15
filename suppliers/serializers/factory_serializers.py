@@ -17,8 +17,9 @@ class MainFactorySerializer(serializers.ModelSerializer):
         factory_data = validated_data.copy()
         contacts_data = factory_data.pop('contacts')
 
-        # Установить contact_owner в модели Contacts данными из retail_chain_data(:validated_data)
+        # Установить contact_owner в модели Contacts данными из retail_chain_data
         contacts_data['contact_owner'] = factory_data['title']
+        contacts_data['type_owner_organization'] = 'Завод'
 
         contacts = ContactSerializer(data=contacts_data)
 

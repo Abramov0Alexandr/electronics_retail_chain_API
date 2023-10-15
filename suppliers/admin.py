@@ -15,7 +15,8 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(RetailChains)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'debt_amount', 'supplier', 'registration_date', 'contacts', 'registration_date')
+    list_display = ('id', 'title', 'registration_date', 'contacts',
+                    'supplier_id', 'supplier_content_type', 'supplier_title', 'debt_amount')
     date_hierarchy = 'registration_date'
     list_display_links = ('title', )
     empty_value_display = "Отсутствует"
