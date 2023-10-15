@@ -51,15 +51,15 @@ class RetailChainDeleteAPIView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
 
-        retail_chain = self.get_object()  # Получаем объект розничной сети
-        contacts = retail_chain.contacts  # Получаем связанные с объектом контакты
+        retail_chain = self.get_object()  # Получить объект розничной сети
+        contacts = retail_chain.contacts  # Получить связанные с объектом контакты
 
-        if contacts:  # Удаляем связанные контакты
+        if contacts:  # Удалить связанные контакты
             contacts.delete()
 
-        self.perform_destroy(retail_chain)  # Вызываем стандартный метод удаления для розничной сети
+        self.perform_destroy(retail_chain)  # Вызвать стандартный метод удаления для розничной сети
 
-        # Возвращаем успешный ответ
+        # Вернуть успешный ответ
         return Response(
             {'detail': f'Розничная сеть {retail_chain.title} и связанные с ней контакты были успешно удалены'},
             status=status.HTTP_204_NO_CONTENT)
