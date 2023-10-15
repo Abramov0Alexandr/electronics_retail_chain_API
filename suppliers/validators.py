@@ -14,9 +14,9 @@ class RequiredSupplierField:
             raise ValidationError(
                 {
                     'message':
-                        {'supplier_content_type': 'Для создания связи с поставщиком необходимо указать '
-                                                  '9 (для связи с заводом) '
-                                                  '10 (для связи с индивидуальным предпринимателем) '
+                        {'supplier_content_type': 'Для создания связи с поставщиком необходимо указать: '
+                                                  '9 (для связи с заводом), '
+                                                  '10 (для связи с индивидуальным предпринимателем), '
                                                   '11 (для розничной сети)',
                          'supplier_id': 'id поставщика',
                          'status': status.HTTP_400_BAD_REQUEST
@@ -33,7 +33,7 @@ class NewTitleValidationError:
     def __call__(self, value):
         new_title = value.get(self.field)
 
-        if Factory.objects.filter(title=new_title).exists():
+        if Factory.objects.filter(title__icontains=new_title).exists():
             raise ValidationError(
                 {
                     "title": [f"Название \'{new_title}\' уже используется."],
@@ -41,7 +41,7 @@ class NewTitleValidationError:
                 }
             )
 
-        if RetailChains.objects.filter(title=new_title).exists():
+        if RetailChains.objects.filter(title__icontains=new_title).exists():
             raise ValidationError(
                 {
                     "title": [f"Название \'{new_title}\' уже используется."],
@@ -49,7 +49,7 @@ class NewTitleValidationError:
                 }
             )
 
-        if Vendors.objects.filter(title=new_title).exists():
+        if Vendors.objects.filter(title__icontains=new_title).exists():
             raise ValidationError(
                 {
                     "title": [f"Название \'{new_title}\' уже используется."],
