@@ -62,7 +62,7 @@ class VendorDeleteAPIView(generics.DestroyAPIView):
         if contacts:
             contacts.delete()
 
-        self.perform_destroy(vendor)  # Вызываем стандартный метод удаления для розничной сети
+        self.perform_destroy(vendor)  # Вызвать стандартный метод удаления для розничной сети
 
         # Возвращаем успешный ответ
         return Response(

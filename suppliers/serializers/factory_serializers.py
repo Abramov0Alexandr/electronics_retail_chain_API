@@ -2,6 +2,7 @@ from rest_framework import serializers
 from contacts.serializers import ContactSerializer
 from products.serializers import ProductSerializer
 from suppliers.models import Factory
+from suppliers.validators import NewTitleValidationError
 
 
 class MainFactorySerializer(serializers.ModelSerializer):
@@ -11,6 +12,7 @@ class MainFactorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Factory
         fields = '__all__'
+        validators = [NewTitleValidationError(field='title')]
 
     def create(self, validated_data):
         # Извлечь данные для создания объекта Factory

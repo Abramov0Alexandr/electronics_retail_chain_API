@@ -12,7 +12,8 @@ class RetailChainSerializer(serializers.ModelSerializer):
     class Meta:
         model = RetailChains
         fields = '__all__'
-        validators = [RequiredSupplierField()]
+        validators = [RequiredSupplierField(),
+                      NewTitleValidationError(field='title')]
 
     def create(self, validated_data):
 
@@ -34,10 +35,6 @@ class RetailChainSerializer(serializers.ModelSerializer):
             retail_chain = RetailChains.objects.create(contacts=contacts_instance, **retail_chain_data)
             return retail_chain
 
-        else:
-            raise serializers.ValidationError({'detail': f'Название \'{retail_chain_data["title"]}\' уже используется',
-                                               'status': f'{status.HTTP_400_BAD_REQUEST}'})
-
 
 class RetailChainSupplierSerializer(serializers.ModelSerializer):
     """
@@ -49,6 +46,7 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = RetailChains
         fields = '__all__'
+        validators = [NewTitleValidationError(field='title')]
 
     def create(self, validated_data):
 
@@ -59,10 +57,10 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
         supplier_id = validated_data.get('supplier_id')
 
         # Проверить, что content_type соответствует определенным моделям
-        if supplier_content_type_choice.id in [9, 10]:
+        if supplier_content_type_choice.id in [9, 11]:
 
             # Определить какая модель будет установлена в качестве поставщика
-            supplier_model = Factory if supplier_content_type_choice.id == 9 else Vendors
+            supplier_model = Vendors if supplier_content_type_choice.id == 9 else Factory
 
             # Проверить, что объекты поставщика уже существуют, если нет, вызвать исключение
             supplier_instance = supplier_model.objects.filter(id=supplier_id)
@@ -84,10 +82,6 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
                         **vendor_data)
                     return vendor
 
-                else:
-                    raise serializers.ValidationError(
-                        {'detail': f'{contacts_serializer.errors.get("contact_owner")[0]}',
-                         'status': f'{status.HTTP_400_BAD_REQUEST}'})
             else:
                 raise serializers.ValidationError(
                     {'detail': f'{supplier_content_type_choice.name} c ID:{supplier_id} не зарегистрирован',
@@ -96,8 +90,8 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError(
                 {'detail': 'Указанный некорректный id типа поставщика. '
-                           'Укажите: supplier_content_type:9 (Завод), '
-                           'supplier_content_type:10 (Индивидуальный предприниматель)',
+                           'Укажите: supplier_content_type:9 (Индивидуальный предприниматель), '
+                           'supplier_content_type:11 (Завод)',
                  'status': f'{status.HTTP_400_BAD_REQUEST}'})
 
 

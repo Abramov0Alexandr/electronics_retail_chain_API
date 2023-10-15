@@ -1,9 +1,9 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from rest_framework import serializers, status
-
 from contacts.models import Contacts
-from suppliers.models import RetailChains, Vendors
+from suppliers.models import RetailChains, Vendors, Factory
+from suppliers.views import services
 
 
 @receiver(post_save, sender=RetailChains)
@@ -31,35 +31,47 @@ def update_related_contact(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=RetailChains)
-def update_vendor_supplier_title(sender, instance, **kwargs):
+def update_vendor_supplier_retail_chain_title(sender, instance, **kwargs):
     """
     Сигнал для обновления поля supplier_title (наименование поставщика) модели Vendors.
     При изменении названия розничной сети, новое название также изменяется и у связанного объекта заказчика.
     Данное поле носит только информационный характер.
     """
 
-    vendors = Vendors.objects.filter(supplier_id=instance.id)
+    services.update_vendor_supplier_title(sender, instance, **kwargs)
 
-    if vendors.exists():  # Проверить наличие совпадающих объектов
-        vendor = vendors.first()  # Получить первый объект из QuerySet
-        vendor.supplier_title = instance.title
-        vendor.save()
+
+@receiver(post_save, sender=Factory)
+def update_vendor_supplier_factory_title(sender, instance, **kwargs):
+    """
+    Сигнал для обновления поля supplier_title (наименование поставщика) модели Vendors.
+    При изменении названия завода, новое название также изменяется и у связанного объекта заказчика.
+    Данное поле носит только информационный характер.
+    """
+
+    services.update_vendor_supplier_title(sender, instance, **kwargs)
+
+
+@receiver(post_save, sender=Factory)
+def update_retail_chain_supplier_factory_title(sender, instance, **kwargs):
+    """
+    Сигнал для обновления поля supplier_title (наименование поставщика) модели RetailChains.
+    При изменении названия завода, новое название также изменяется и у связанного объекта заказчика.
+    Данное поле носит только информационный характер.
+    """
+
+    services.update_retail_chain_supplier_title(sender, instance, **kwargs)
 
 
 @receiver(post_save, sender=Vendors)
-def update_retail_chain_supplier_title(sender, instance, **kwargs):
+def update_retail_chain_supplier_vendor_title(sender, instance, **kwargs):
     """
     Сигнал для обновления поля supplier_title (наименование поставщика) модели RetailChains.
     При изменении названия розничной сети, новое название также изменяется и у связанного объекта заказчика.
     Данное поле носит только информационный характер.
     """
 
-    retail_chains = RetailChains.objects.filter(supplier_id=instance.id)
-
-    if retail_chains.exists():  # Проверить наличие совпадающих объектов
-        retail_chain = retail_chains.first()  # Получить первый объект из QuerySet
-        retail_chain.supplier_title = instance.title
-        retail_chain.save()
+    services.update_retail_chain_supplier_title(sender, instance, **kwargs)
 
 
 @receiver(post_delete, sender=Vendors)
