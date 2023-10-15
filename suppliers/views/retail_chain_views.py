@@ -1,17 +1,34 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from suppliers.models import RetailChains
-from suppliers.serializers import MainRetailChainsSerializer, RetailChainListSerializer
+from suppliers.serializers import RetailChainSerializer, RetailChainSupplierSerializer, RetailChainListSerializer
 from suppliers.serializers.retail_chain_serializers import RetailChainUpdateSerializer
 
 
 class RetailChainCreateApiView(generics.CreateAPIView):
     """
-    Контроллер для публикации продукта.
-    Доступ к контроллеру имеется только у суперпользователя и пользователей со статусом "Продавец".
+.
     """
 
-    serializer_class = MainRetailChainsSerializer
+    def get_serializer_class(self):
+
+        supplier_content_type_choice = self.request.data.get('supplier_content_type')
+        supplier_id = self.request.data.get('supplier_id')
+
+        if supplier_content_type_choice and supplier_id:
+            return RetailChainSupplierSerializer
+
+        else:
+            return RetailChainSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RetailChainListApiView(generics.ListAPIView):

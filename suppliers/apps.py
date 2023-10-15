@@ -5,3 +5,6 @@ class SuppliersConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'suppliers'
     verbose_name = 'Поставщики'
+
+    def ready(self):
+        import suppliers.signals

@@ -37,7 +37,8 @@ class VendorSelfSupplierSerializer(serializers.ModelSerializer):
             return vendor
 
         else:
-            raise serializers.ValidationError("Контактные данные не валидны")
+            raise serializers.ValidationError({'detail': f'{contacts.errors.get("contact_owner")[0]}',
+                                               'status': f'{status.HTTP_400_BAD_REQUEST}'})
 
 
 class VendorRelatedSupplierSerializer(serializers.ModelSerializer):
@@ -85,6 +86,9 @@ class VendorRelatedSupplierSerializer(serializers.ModelSerializer):
                         **vendor_data)
                     return vendor
 
+                else:
+                    raise serializers.ValidationError({'detail': f'{contacts_serializer.errors.get("contact_owner")[0]}',
+                                                       'status': f'{status.HTTP_400_BAD_REQUEST}'})
             else:
                 raise serializers.ValidationError(
                     {'detail': f'{supplier_content_type_choice.name} c ID:{supplier_id} не зарегистрирован',

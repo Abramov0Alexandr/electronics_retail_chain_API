@@ -7,12 +7,12 @@ from suppliers.serializers import (VendorSelfSupplierSerializer, VendorRelatedSu
 
 class VendorCreateAPIView(generics.CreateAPIView):
     """
-    Контроллер для создания объекта Vendors
+    Контроллер для создания объекта Vendors.
     """
 
     def get_serializer_class(self):
         """
-        В зависимости от переданных в POST запросе данных, происходит выбор сериализатора
+        В зависимости от переданных в POST запросе данных, происходит выбор сериализатора.
         """
 
         supplier_content_type_choice = self.request.data.get('supplier_content_type')
@@ -36,7 +36,7 @@ class VendorCreateAPIView(generics.CreateAPIView):
 
 class VendorsListAPIView(generics.ListAPIView):
     """
-    Контроллер для просмотра списка зарегистрированных ИП
+    Контроллер для просмотра списка зарегистрированных ИП.
     """
     queryset = Vendors.objects.all()
     serializer_class = VendorsListSerializer
@@ -49,7 +49,7 @@ class VendorUpdateAPIView(generics.UpdateAPIView):
 
 class VendorDeleteAPIView(generics.DestroyAPIView):
     """
-    Контроллер для удаления объекта модели Vendors и связанный с ним контакт
+    Контроллер для удаления объекта модели Vendors и связанный с ним контакт.
     """
 
     queryset = Vendors.objects.all()

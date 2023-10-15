@@ -16,6 +16,7 @@ class Vendors(models.Model):
     contacts = models.OneToOneField(Contacts, on_delete=models.CASCADE,
                                     related_name='vendor_contacts', verbose_name='Контакты')
 
+    # Поля для работы со связанными моделями
     supplier_title = models.CharField(max_length=250, verbose_name='Наименование поставщика', **NULLABLE)
     supplier_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, **NULLABLE,)
     supplier_id = models.CharField(max_length=250, verbose_name='ID поставщика', **NULLABLE)
