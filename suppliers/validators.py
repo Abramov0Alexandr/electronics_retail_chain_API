@@ -9,23 +9,18 @@ class RequiredSupplierField:
         supplier_content_type = value.get('supplier_content_type')
         supplier_id = value.get('supplier_id')
 
-        if supplier_content_type and not supplier_id:
-            raise ValidationError(
-                {
-                    'message': 'Для создания связи с поставщиком необходимо указать '
-                               'supplier_content_type: 9 (Завод) или 11 (Розничная сеть) '
-                               'и supplier_id (id поставщика)',
-                    'status': status.HTTP_400_BAD_REQUEST
-                }
-            )
+        if (supplier_content_type and not supplier_id) or (supplier_id and not supplier_content_type):
 
-        if supplier_id and not supplier_content_type:
             raise ValidationError(
                 {
-                    'message': 'Для создания связи с поставщиком необходимо указать '
-                               'supplier_content_type: 9 (Завод) или 11 (Розничная сеть) '
-                               'и supplier_id (id поставщика)',
-                    'status': status.HTTP_400_BAD_REQUEST
+                    'message':
+                        {'supplier_content_type': 'Для создания связи с поставщиком необходимо указать '
+                                                  '9 (для связи с заводом) '
+                                                  '10 (для связи с индивидуальным предпринимателем) '
+                                                  '11 (для розничной сети)',
+                         'supplier_id': 'id поставщика',
+                         'status': status.HTTP_400_BAD_REQUEST
+                         }
                 }
             )
 
@@ -38,13 +33,13 @@ class NewTitleValidationError:
     def __call__(self, value):
         new_title = value.get(self.field)
 
-        # if Factory.objects.filter(title=new_title).exists():
-        #     raise ValidationError(
-        #         {
-        #             "title": [f"Название \'{new_title}\' уже используется."],
-        #             'status': status.HTTP_400_BAD_REQUEST
-        #         }
-        #     )
+        if Factory.objects.filter(title=new_title).exists():
+            raise ValidationError(
+                {
+                    "title": [f"Название \'{new_title}\' уже используется."],
+                    'status': status.HTTP_400_BAD_REQUEST
+                }
+            )
 
         if RetailChains.objects.filter(title=new_title).exists():
             raise ValidationError(
