@@ -112,6 +112,19 @@ class RetailChainUpdateSerializer(serializers.ModelSerializer):
     Сериализатор вместе с названием объекта, обновляет поле contact_owner модели Contacts
     """
 
+    def update(self, instance, validated_data):
+
+        # Обновить название розничной сети
+        instance.title = validated_data.get('title', instance.title)
+        instance.save()
+
+        # Обновить связанные с объектом контакты
+        contact_instance = instance.contacts
+        contact_instance.contact_owner = validated_data.get('title', contact_instance.contact_owner)
+        contact_instance.save()
+
+        return instance
+
     class Meta:
         model = RetailChains
         validators = [NewTitleValidationError(field='title')]

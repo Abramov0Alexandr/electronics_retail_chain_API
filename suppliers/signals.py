@@ -1,33 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from rest_framework import serializers, status
-from contacts.models import Contacts
 from suppliers.models import RetailChains, Vendors, Factory
 from suppliers.views import services
-
-
-@receiver(post_save, sender=RetailChains)
-def update_related_contact(sender, instance, **kwargs):
-    """
-    Сигнал для обновления поля contact_owner модели Contacts.
-    При изменении названия розничной сети, новое название также изменяется и в связанных контактах.
-
-    Изначально, происходит проверка на то, что работа по обновлению контакта будет вестись у уже существующего
-    объекта. В случае, если же происходит первоначальное создание объекта, то он исключается из работы сигнала.
-    """
-
-    # Исключить вновь созданный объект из работы и проверить, что новое название не занято другими объектами
-    if Contacts.objects.exclude(id=instance.contacts_id).filter(contact_owner=instance.title).exists():
-
-        # Инициировать ошибку, если в поле contact_owner уже указано такое же значение
-        raise serializers.ValidationError(
-            {'detail': f'Название {instance.title} уже используется',
-             'status': f'{status.HTTP_400_BAD_REQUEST}'})
-
-    else:
-        related_contacts = Contacts.objects.get(id=instance.contacts_id)
-        related_contacts.contact_owner = instance.title
-        related_contacts.save()
 
 
 @receiver(post_save, sender=RetailChains)

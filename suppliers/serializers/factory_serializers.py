@@ -68,4 +68,5 @@ class FactoryUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Factory
+        validators = [NewTitleValidationError(field='title')]
         fields = ('title',)
