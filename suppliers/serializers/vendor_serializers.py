@@ -1,15 +1,17 @@
 from rest_framework import serializers, status
-from contacts.serializers import ContactSerializer
+from contacts.serializers import CreateContactSerializer
 from suppliers.models import Vendors, RetailChains, Factory
 from suppliers.validators import RequiredSupplierField, NewTitleValidationError
 
 
 class VendorSelfSupplierSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для создания простого ИП (без указания поставщика)
+    Сериализатор для создания нового объекта модели Vendors.
+    Сериализатор вызывается при создании объекта без указания поставщика.
+    Одновременно с созданием объекта Vendors, также создаются связанные с объектом контакты.
     """
 
-    contacts = ContactSerializer(required=True)
+    contacts = CreateContactSerializer(required=True)
 
     class Meta:
         model = Vendors
@@ -19,18 +21,18 @@ class VendorSelfSupplierSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        # Извлечь все необходимые для дальнейшей работы данные
+        # Извлечь данные для создания объекта RetailChains и связанных с ним контактов
         vendor_data = validated_data.copy()
         contacts_data = vendor_data.pop('contacts')
 
-        # Установить contact_owner и type_owner_organization в модели Contacts
+        # Заполнить поле "contact_owner" и "type_owner_organization" в связанных контактах
         contacts_data['contact_owner'] = vendor_data['title']
         contacts_data['type_owner_organization'] = 'Индивидуальный предприниматель'
 
-        contacts = ContactSerializer(data=contacts_data)
+        contacts = CreateContactSerializer(data=contacts_data)
 
         if contacts.is_valid():
-            # Сохранить экземпляр объекта Contacts
+            # Создать объект Contacts
             contacts_instance = contacts.save()
 
             # Создать объект Vendors с заполнением поля contacts
@@ -40,10 +42,11 @@ class VendorSelfSupplierSerializer(serializers.ModelSerializer):
 
 class VendorRelatedSupplierSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для создания ИП с указанием поставщика
+    Сериализатор для создания нового объекта модели Vendors с указанием поставщика.
+    Одновременно с созданием объекта Vendors, также создаются связанные с объектом контакты.
     """
 
-    contacts = ContactSerializer(required=True)
+    contacts = CreateContactSerializer(required=True)
 
     class Meta:
         model = Vendors
@@ -52,9 +55,11 @@ class VendorRelatedSupplierSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        # Извлечь все необходимые для дальнейшей работы данные
+        # Извлечь данные для создания объекта Vendors и связанных с ним контактов
         vendor_data = validated_data.copy()
         vendor_contacts_data = vendor_data.pop('contacts')
+
+        # Извлечь данные для дальнейшего определения поставщика
         supplier_content_type_choice = validated_data.get('supplier_content_type')
         supplier_id = validated_data.get('supplier_id')
 
@@ -64,20 +69,21 @@ class VendorRelatedSupplierSerializer(serializers.ModelSerializer):
             # Определить какая модель будет установлена в качестве поставщика
             supplier_model = RetailChains if supplier_content_type_choice.id == 10 else Factory
 
-            # Проверить, что объекты поставщика уже существуют, если нет, вызвать исключение
+            # Проверить, что объект выбранной модели поставщика уже существует, если нет, вызвать исключение
             supplier_instance = supplier_model.objects.filter(id=supplier_id)
 
             if supplier_instance.exists():
 
-                # Установить contact_owner и type_owner_organization в модели Contacts
+                # Заполнить поле "contact_owner" и "type_owner_organization" в связанных контактах
                 vendor_contacts_data['contact_owner'] = vendor_data['title']
                 vendor_contacts_data['type_owner_organization'] = 'Индивидуальный предприниматель'
-                contacts_serializer = ContactSerializer(data=vendor_contacts_data)
+                contacts_serializer = CreateContactSerializer(data=vendor_contacts_data)
 
                 if contacts_serializer.is_valid():
+                    # Создать объект Contacts
                     contacts_instance = contacts_serializer.save()
 
-                    # Создание объекта Vendors
+                    # Создать объект Vendors с указанием контактов и поставщика
                     vendor = Vendors.objects.create(
                         contacts=contacts_instance,
                         supplier_title=supplier_model.objects.get(id=supplier_id).title,
@@ -98,27 +104,33 @@ class VendorRelatedSupplierSerializer(serializers.ModelSerializer):
 
 
 class VendorsListSerializer(serializers.ModelSerializer):
-    """Сериализатор для выполнения GET запроса"""
-    contacts = ContactSerializer(read_only=True)
+    """
+    Контроллер для получения списка объектов модели Vendors.
+    Информация содержит данные поставщика и его контакты.
+    """
+
+    vendor_contacts = CreateContactSerializer(source='contacts', read_only=True)
+    vendor_title = serializers.CharField(source='title', read_only=True)
+    supplier_type = serializers.CharField(source='supplier_content_type', read_only=True)
 
     class Meta:
         model = Vendors
-        exclude = ('supplier_content_type',)
+        exclude = ('contacts', 'title', 'supplier_content_type',)
 
 
 class VendorUpdateSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для обновления информации об объекте модели Vendors.
-    Сериализатор вместе с названием объекта, обновляет поле contact_owner модели Contacts
+    Сериализатор для редактирования поля "title" у объекта модели Vendors.
+    При изменении поля "title" также изменяется поле contact_owner в связанных с объектом контактах.
     """
 
     def update(self, instance, validated_data):
 
-        # Обновить название завода
+        # Обновить поле "title" у объекта Vendors
         instance.title = validated_data.get('title', instance.title)
         instance.save()
 
-        # Обновить контакты
+        # Обновить связанные с объектом контакты
         contact_instance = instance.contacts
         contact_instance.contact_owner = validated_data.get('title', contact_instance.contact_owner)
         contact_instance.save()
@@ -126,6 +138,6 @@ class VendorUpdateSerializer(serializers.ModelSerializer):
         return instance
 
     class Meta:
-        model = Factory
+        model = Vendors
         validators = [NewTitleValidationError(field='title')]
         fields = ('title',)

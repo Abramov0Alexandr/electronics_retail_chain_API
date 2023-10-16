@@ -1,13 +1,17 @@
 from rest_framework import serializers
-from contacts.serializers import ContactSerializer
+from contacts.serializers import CreateContactSerializer
 from products.serializers import ProductSerializer
 from suppliers.models import Factory
 from suppliers.validators import NewTitleValidationError
 
 
-class MainFactorySerializer(serializers.ModelSerializer):
+class FactoryCreateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания нового объекта модели Factory.
+    Одновременно с созданием объекта Factory, также создаются связанные с данным контакты.
+    """
 
-    contacts = ContactSerializer(required=True)
+    contacts = CreateContactSerializer(required=True)
 
     class Meta:
         model = Factory
@@ -15,18 +19,19 @@ class MainFactorySerializer(serializers.ModelSerializer):
         validators = [NewTitleValidationError(field='title')]
 
     def create(self, validated_data):
-        # Извлечь данные для создания объекта Factory
+        # Извлечь данные для создания объекта Factory и связанных с ним контактов
         factory_data = validated_data.copy()
         contacts_data = factory_data.pop('contacts')
 
-        # Установить contact_owner в модели Contacts данными из retail_chain_data
+        # Заполнить поле "contact_owner" и "type_owner_organization" в связанных контактах
         contacts_data['contact_owner'] = factory_data['title']
         contacts_data['type_owner_organization'] = 'Завод'
 
-        contacts = ContactSerializer(data=contacts_data)
+        contacts = CreateContactSerializer(data=contacts_data)
 
         if contacts.is_valid():
-            # Сохранить экземпляр объекта Contacts
+
+            # Создать объект Contacts
             contacts_instance = contacts.save()
 
             # Создать объект Factory с заполнением поля contacts
@@ -38,8 +43,12 @@ class MainFactorySerializer(serializers.ModelSerializer):
 
 
 class FactoryDetailSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для получения детальной информации об объекте модели Factory.
+    Информация содержит данные поставщика, его контакты и продукты.
+    """
 
-    factory_contacts = ContactSerializer(source='contacts', read_only=True)
+    factory_contacts = CreateContactSerializer(source='contacts', read_only=True)
     products_info = ProductSerializer(source='factory_product', many=True, read_only=True)
     factory_title = serializers.CharField(source='title', read_only=True)
 
@@ -50,22 +59,24 @@ class FactoryDetailSerializer(serializers.ModelSerializer):
 
 class FactoryUpdateSerializer(serializers.ModelSerializer):
     """
-    При изменении названия завода ток же изменяется и поле contact_owner в модели Контакты
+    Сериализатор для редактирования поля "title" у объекта модели Factory.
+    При изменении поля "title" также изменяется поле contact_owner в связанных с объектом контактах.
     """
+
+    class Meta:
+        model = Factory
+        validators = [NewTitleValidationError(field='title')]
+        fields = ('title',)
 
     def update(self, instance, validated_data):
 
-        # Обновляем название завода
+        # Обновить поле "title" у объекта Factory
         instance.title = validated_data.get('title', instance.title)
         instance.save()
 
-        # Обновляем контакты
+        # Обновить связанные с объектом контакты
         contact_instance = instance.contacts
         contact_instance.contact_owner = validated_data.get('title', contact_instance.contact_owner)
         contact_instance.save()
 
         return instance
-
-    class Meta:
-        model = Factory
-        fields = ('title',)

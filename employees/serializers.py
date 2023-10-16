@@ -2,7 +2,10 @@ from rest_framework import serializers
 from employees.models import Employee
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
+class EmployeeCreateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания нового объекта модели Employee.
+    """
 
     class Meta:
         model = Employee
@@ -21,6 +24,10 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 
 class EmployeeListSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для вывода списка объектов модели Employee.
+    """
+
     class Meta:
         model = Employee
         fields = '__all__'

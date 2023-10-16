@@ -1,28 +1,28 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from suppliers.models import Vendors
-from suppliers.serializers import (VendorSelfSupplierSerializer, VendorRelatedSupplierSerializer,
-                                   VendorsListSerializer, VendorUpdateSerializer)
+from suppliers import serializers
 
 
 class VendorCreateAPIView(generics.CreateAPIView):
     """
-    Контроллер для создания объекта Vendors.
+    Контроллер для создания нового объекта модели Vendors.
     """
 
     def get_serializer_class(self):
         """
-        В зависимости от переданных в POST запросе данных, происходит выбор сериализатора.
+        Метод для определения будет ли создаваться объект без поставщика или с поставщиком.
+        :return: Сериализатор для создания объекта модели Vendors.
         """
 
         supplier_content_type_choice = self.request.data.get('supplier_content_type')
         supplier_id = self.request.data.get('supplier_id')
 
         if supplier_content_type_choice and supplier_id:
-            return VendorRelatedSupplierSerializer
+            return serializers.VendorRelatedSupplierSerializer
 
         else:
-            return VendorSelfSupplierSerializer
+            return serializers.VendorSelfSupplierSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -36,35 +36,40 @@ class VendorCreateAPIView(generics.CreateAPIView):
 
 class VendorsListAPIView(generics.ListAPIView):
     """
-    Контроллер для просмотра списка зарегистрированных ИП.
+    Контроллер для получения списка объектов модели Vendors.
     """
+
     queryset = Vendors.objects.all()
-    serializer_class = VendorsListSerializer
+    serializer_class = serializers.VendorsListSerializer
 
 
 class VendorUpdateAPIView(generics.UpdateAPIView):
+    """
+    Контроллер для редактирования объекта модели Vendors.
+    """
+
     queryset = Vendors.objects.all()
-    serializer_class = VendorUpdateSerializer
+    serializer_class = serializers.VendorUpdateSerializer
 
 
 class VendorDeleteAPIView(generics.DestroyAPIView):
     """
-    Контроллер для удаления объекта модели Vendors и связанный с ним контакт.
+    Контроллер для удаления объекта модели Vendors.
+    Контроллер одновременно с удалением объект поставщика, удаляет и связанные с ним контакты.
     """
 
     queryset = Vendors.objects.all()
 
     def delete(self, request, *args, **kwargs):
 
-        vendor = self.get_object()
-        contacts = vendor.contacts
+        vendor = self.get_object()  # Получить объект поставщика
+        contacts = vendor.contacts  # Получить связанные с объектом контакты
 
-        if contacts:
+        if contacts:  # Удалить связанные контакты
             contacts.delete()
 
-        self.perform_destroy(vendor)  # Вызвать стандартный метод удаления для розничной сети
+        self.perform_destroy(vendor)  # Вызвать стандартный метод удаления для удаления объекта поставщика
 
-        # Возвращаем успешный ответ
         return Response(
             {'detail': f'Индивидуальный предприниматель \'{vendor.title}\' '
                        f'и связанные с ним контакты были успешно удалены'},

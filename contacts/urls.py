@@ -7,5 +7,5 @@ app_name = ContactsConfig.name
 
 
 urlpatterns = [
-    path('update/<int:pk>/', views.ContactUpdateAPIView.as_view(), name='update_product'),
+    path('update/<int:pk>/', views.ContactUpdateAPIView.as_view(), name='update_contact'),
     ]
