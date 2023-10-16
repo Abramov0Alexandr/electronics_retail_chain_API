@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from suppliers.models import RetailChains, Vendors, Factory
-from suppliers.views import services
+from suppliers import services
 
 
 @receiver(post_save, sender=RetailChains)
