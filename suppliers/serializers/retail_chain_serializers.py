@@ -141,4 +141,3 @@ class RetailChainUpdateSerializer(serializers.ModelSerializer):
         model = RetailChains
         validators = [NewTitleValidationError(field='title')]
         fields = ('title',)
-

@@ -209,13 +209,13 @@
 
 ## Документация
 Документацию к API вы можете найти перейдя по следующим ссылкам:<br>
-http://127.0.0.1:8000/swagger/ <br>
-http://127.0.0.1:8000/redoc/
+http://127.0.0.1:8000/api/swagger/ <br>
+http://127.0.0.1:8000/api/redoc/
 
 
 
 ## Лицензия
-Marketplace API распространяется по [MIT License](https://opensource.org/licenses/MIT).
+Electronics retail chain_API распространяется по [MIT License](https://opensource.org/licenses/MIT).
 
 ## Контакты
 

@@ -9,7 +9,7 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = ('first_name', 'last_name', 'patronymic', 'email', 'password')
+        fields = ('id', 'first_name', 'last_name', 'patronymic', 'email', 'password')
 
     def create(self, validated_data):
         """
@@ -26,6 +26,16 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
 class EmployeeListSerializer(serializers.ModelSerializer):
     """
     Сериализатор для вывода списка объектов модели Employee.
+    """
+
+    class Meta:
+        model = Employee
+        fields = ('id', 'first_name', 'last_name', 'patronymic', 'email', 'date_joined')
+
+
+class AdminEmployeeListSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для вывода списка объектов модели Employee с полной информацией о сотрудниках.
     """
 
     class Meta:
