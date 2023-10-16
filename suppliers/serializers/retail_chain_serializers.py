@@ -1,13 +1,17 @@
 from rest_framework import serializers, status
-from contacts.serializers import ContactSerializer
+from contacts.serializers import CreateContactSerializer
 from suppliers.models import RetailChains, Factory, Vendors
-from suppliers.serializers import FactoryDetailSerializer
 from suppliers.validators import RequiredSupplierField, NewTitleValidationError
 
 
 class RetailChainSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания нового объекта модели RetailChains.
+    Сериализатор вызывается при создании объекта без указания поставщика.
+    Одновременно с созданием объекта RetailChains, также создаются связанные с объектом контакты.
+    """
 
-    contacts = ContactSerializer(required=True)
+    contacts = CreateContactSerializer(required=True)
 
     class Meta:
         model = RetailChains
@@ -17,18 +21,18 @@ class RetailChainSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        # Извлечь данные для создания объекта RetailChains
+        # Извлечь данные для создания объекта RetailChains и связанных с ним контактов
         retail_chain_data = validated_data.copy()
         contacts_data = retail_chain_data.pop('contacts')
 
-        # Установить contact_owner и type_owner_organization в модели Contacts
+        # Заполнить поле "contact_owner" и "type_owner_organization" в связанных контактах
         contacts_data['contact_owner'] = retail_chain_data['title']
         contacts_data['type_owner_organization'] = 'Розничная сеть'
 
-        contacts = ContactSerializer(data=contacts_data)
+        contacts = CreateContactSerializer(data=contacts_data)
 
         if contacts.is_valid():
-            # Сохранить экземпляр объекта Contacts
+            # Создать объект Contacts
             contacts_instance = contacts.save()
 
             # Создать объект RetailChains с заполнением поля contacts
@@ -38,10 +42,11 @@ class RetailChainSerializer(serializers.ModelSerializer):
 
 class RetailChainSupplierSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для создания ИП с указанием поставщика
+    Сериализатор для создания нового объекта модели RetailChains с указанием поставщика.
+    Одновременно с созданием объекта RetailChains, также создаются связанные с объектом контакты.
     """
 
-    contacts = ContactSerializer(required=True)
+    contacts = CreateContactSerializer(required=True)
 
     class Meta:
         model = RetailChains
@@ -50,9 +55,11 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        # Извлечь все необходимые для дальнейшей работы данные
-        vendor_data = validated_data.copy()
-        vendor_contacts_data = vendor_data.pop('contacts')
+        # Извлечь данные для создания объекта RetailChains и связанных с ним контактов
+        retail_chain_data = validated_data.copy()
+        retail_chain_contacts_data = retail_chain_data.pop('contacts')
+
+        # Извлечь данные для дальнейшего определения поставщика
         supplier_content_type_choice = validated_data.get('supplier_content_type')
         supplier_id = validated_data.get('supplier_id')
 
@@ -62,25 +69,26 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
             # Определить какая модель будет установлена в качестве поставщика
             supplier_model = Vendors if supplier_content_type_choice.id == 9 else Factory
 
-            # Проверить, что объекты поставщика уже существуют, если нет, вызвать исключение
+            # Проверить, что объект выбранной модели поставщика уже существует, если нет, вызвать исключение
             supplier_instance = supplier_model.objects.filter(id=supplier_id)
 
             if supplier_instance.exists():
 
-                # Установить contact_owner и type_owner_organization в модели Contacts
-                vendor_contacts_data['contact_owner'] = vendor_data['title']
-                vendor_contacts_data['type_owner_organization'] = 'Розничная сеть'
-                contacts_serializer = ContactSerializer(data=vendor_contacts_data)
+                # Заполнить поле "contact_owner" и "type_owner_organization" в связанных контактах
+                retail_chain_contacts_data['contact_owner'] = retail_chain_data['title']
+                retail_chain_contacts_data['type_owner_organization'] = 'Розничная сеть'
+                contacts_serializer = CreateContactSerializer(data=retail_chain_contacts_data)
 
                 if contacts_serializer.is_valid():
+                    # Создать объект Contacts
                     contacts_instance = contacts_serializer.save()
 
-                    # Создание объекта Vendors
-                    vendor = RetailChains.objects.create(
+                    # Создать объект RetailChains с указанием контактов и поставщика
+                    retail_chain = RetailChains.objects.create(
                         contacts=contacts_instance,
                         supplier_title=supplier_model.objects.get(id=supplier_id).title,
-                        **vendor_data)
-                    return vendor
+                        **retail_chain_data)
+                    return retail_chain
 
             else:
                 raise serializers.ValidationError(
@@ -96,25 +104,29 @@ class RetailChainSupplierSerializer(serializers.ModelSerializer):
 
 
 class RetailChainListSerializer(serializers.ModelSerializer):
+    """
+    Контроллер для получения списка объектов модели RetailChains.
+    Информация содержит данные поставщика и его контакты.
+    """
 
-    supplier = FactoryDetailSerializer(read_only=True)
-    retail_chain_contacts = ContactSerializer(source='contacts', read_only=True)
+    retail_chain_contacts = CreateContactSerializer(source='contacts', read_only=True)
     retail_chain_title = serializers.CharField(source='title', read_only=True)
+    supplier_type = serializers.CharField(source='supplier_content_type', read_only=True)
 
     class Meta:
         model = RetailChains
-        exclude = ('title', 'contacts')
+        exclude = ('contacts', 'title', 'supplier_content_type',)
 
 
 class RetailChainUpdateSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для обновления информации об объекте модели RetailChains.
-    Сериализатор вместе с названием объекта, обновляет поле contact_owner модели Contacts
+    Сериализатор для редактирования поля "title" у объекта модели Factory.
+    При изменении поля "title" также изменяется поле contact_owner в связанных с объектом контактах.
     """
 
     def update(self, instance, validated_data):
 
-        # Обновить название розничной сети
+        # Обновить поле "title" у объекта RetailChains
         instance.title = validated_data.get('title', instance.title)
         instance.save()
 
