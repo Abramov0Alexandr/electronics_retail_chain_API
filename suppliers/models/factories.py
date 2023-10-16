@@ -23,4 +23,3 @@ class Factory(models.Model):
         ordering = ('pk', 'registration_date')
         verbose_name = 'Завод'
         verbose_name_plural = 'Заводы'
-
